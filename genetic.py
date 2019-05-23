@@ -49,10 +49,20 @@ class Crossover():
                 new_population.append(selected_pop[i])
         return new_population
 
-#class Mutation():
-#    
-#        
-#def selection():
+class Mutation():
+    def __init__(self, probability):
+        self.probability = probability
+    
+    def sum_value(self, selected_pop):
+        for subject in selected_pop:
+            for i, line in enumerate(subject):
+                for j, value in enumerate(line):
+                    r = random.random()
+                    if r <= self.probability:
+                        subject[i][j] = value + random.uniform(-0.1, 0.1)
+                
+    
+    #def selection():
 #    
   
 if __name__ == "__main__":
