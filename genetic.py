@@ -41,12 +41,13 @@ class Crossover():
         assert len(selected_pop)%2 == 0
         
         new_population = []
-        for i in range(0, len(selected_pop)-1, 2):
+        for subject in selected_pop:
             r = random.random()
             if r <= self.probability:
-                new_population.append((selected_pop[i] + selected_pop[i+1])/2)
+                parent = random.choice(selected_pop)
+                new_population.append((subject + parent)/2)
             else:
-                new_population.append(selected_pop[i])
+                new_population.append(subject)
         return new_population
 
 class Mutation():
@@ -66,7 +67,7 @@ class Mutation():
 #    
   
 if __name__ == "__main__":
-    game = DinoGame(fps=5000)
+    game = DinoGame(fps=1000000)
     genetic = Genetic(20)
     genetic.calc_fitness(game)
     print(genetic.get_fitness())
