@@ -14,7 +14,7 @@ class Genetic():
         n_attributes: Number of attributes each individual possess.
         Number of columns on the population matrix.
         
-        return: Genetic object
+        return: Genetic object.
         """
         self.population = np.random.uniform(size=(n_population, n_attributes))
         
@@ -26,42 +26,63 @@ class Genetic():
         args: Arbitrary argument lists.
         kwargs: Keyword arguments.
         
-        return: None
+        return: None.
         """
         self.fitness = []
         for subject in self.population:
             self.fitness.append(func(subject, *args, **kwargs))
         
     def get_fitness(self):
+        """
+        Getter for the fitness list.
+        
+        return: fitness (list).
+        """
         return self.fitness
         
     def get_population(self):
+        """
+        Getter for the population matrix.
+        
+        return: population (numpy.ndarray).
+        """
         return self.population
     
     def set_population(self, new_population):
+        """
+        Override the population matrix with a new one.
+        
+        new_population: The new population that will replace the old
+        one.
+        
+        return: None.
+        """
         self.population = new_population
         
-    def __play_game(subject, game):
-        scores = []
-        for _ in range(10):
-            game.reset()
-            while not game.game_over:
-                action = np.argmax(subject @ game.get_state())
-                game.step(action)
-            scores.append(game.get_score())
-        return np.mean(scores)
-    
-#    def __build_state_matrix(state):
-#        state_matrix = np.zeros(())
-        
-    
 class Crossover():
     def __init__(self, probability):
+        """
+        Initializes a Crossover object, wich is responsible for applying
+        the distinct types of crossover functions.
+        
+        probability: The probability of ocorruing a crossover.
+        
+        return: Crossover object
+        """
         self.probability = probability
         
     def mean(self, selected_pop):
-        assert len(selected_pop)%2 == 0
+        """
+        Apply crossover by the mean, where the children is the mean
+        between the two parents. For each subject, another parents is
+        chosen randomly.
         
+        selected_pop: The selected population from wich the children
+        will be generated.
+        
+        return: new_population (numpy.ndarray). The new population after
+        the crossover.
+        """
         new_population = []
         for subject in selected_pop:
             r = random.random()
@@ -74,25 +95,34 @@ class Crossover():
 
 class Mutation():
     def __init__(self, probability):
+        """
+        Initializes a Mutation object, wich is responsible for applying
+        the distinct types of mutation functions.
+        
+        probability: The probability of ocorruing a mutation.
+        
+        return: Mutation object
+        """
         self.probability = probability
     
     def sum_value(self, selected_pop):
-        for subject in selected_pop:
-            for i, line in enumerate(subject):
-                for j, value in enumerate(line):
-                    r = random.random()
-                    if r <= self.probability:
-                        subject[i][j] = value + random.uniform(-0.1, 0.1)
+        """
+        Mutate the attribute of a subject by summing a value between
+        [-0.1, 0.1] to it. The mutation has a chance to occur in each
+        attribute from each subject.
+        
+        selected_pop: The selected population that will be mutated.
+        
+        return: new_population (numpy.ndarray). The new population after
+        the mutations.
+        """
+        new_population = selected_pop.copy()
+        for subject in new_population:
+            for i, value in enumerate(subject):
+                r = random.random()
+                if r <= self.probability:
+                    subject[i] = value + random.uniform(-0.1, 0.1)
+        return new_population
                 
-    
+#TODO Selection also update the fitness
     #def selection():
-#    
-  
-if __name__ == "__main__":
-    game = DinoGame(fps=1000000)
-    genetic = Genetic(20)
-    genetic.calc_fitness(game)
-    print(genetic.get_fitness())
-    
-    #crossover = Crossover(0.8)
-    #new_pop = crossover.mean(current_pop)
