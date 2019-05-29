@@ -29,16 +29,6 @@ class Genetic():
         self.fitness = np.empty(len(self.population))
         for i, subject in enumerate(self.population):
             self.fitness[i] = func(subject, *args, **kwargs)
-        
-    def best_individual(self):
-        """
-        Find the index to the best individual (higher fitness) in the
-        population.
-        
-        return: idx_best (int)
-        """
-        idx_best = np.argmax(self.fitness)
-        return idx_best
     
     def get_fitness(self):
         """
@@ -205,12 +195,10 @@ class Selection():
         """
         self.n_selected = n_selected
         
-    def roulette(self, population, fitness):
+    def roulette(self, fitness):
         """
         Apply a roulette wheel selection to the given population.
         
-        population: The population from which the individuals will be
-        selected.
         fitness: The fitness of the individuals from the population,
         matched by the index of the list.
         
@@ -220,5 +208,18 @@ class Selection():
         probabilities = fitness/sum(fitness)
         idx_selected = np.random.choice(len(probabilities), self.n_selected,
                                p=probabilities)
+        return idx_selected
+    
+    def n_best(self, fitness, n):
+        """
+        Select the n best individuals from the population.
+        
+        fitness: The fitness of the individuals from the population,
+        matched by the index of the list.
+        
+        return idx_selected (numpy.ndarray). The index for the n best
+        individuals.
+        """
+        idx_selected = np.argsort(fitness)[-n:]
         return idx_selected
     
