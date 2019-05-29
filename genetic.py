@@ -26,10 +26,20 @@ class Genetic():
         
         return: None.
         """
-        self.fitness = []
-        for subject in self.population:
-            self.fitness.append(func(subject, *args, **kwargs))
+        self.fitness = np.empty(len(self.population))
+        for i, subject in enumerate(self.population):
+            self.fitness[i] = func(subject, *args, **kwargs)
         
+    def best_individual(self):
+        """
+        Find the index to the best individual (higher fitness) in the
+        population.
+        
+        return: idx_best (int)
+        """
+        idx_best = np.argmax(self.fitness)
+        return idx_best
+    
     def get_fitness(self):
         """
         Getter for the fitness list.
@@ -45,6 +55,18 @@ class Genetic():
         return: population (numpy.ndarray).
         """
         return self.population
+    
+    
+    def set_fitness(self, new_fitness):
+        """
+        Override the fitness array with a new one.
+        
+        new_fitness: The new fitness array that will replace the old
+        one.
+        
+        return: None
+        """
+        self.fitness = new_fitness
     
     def set_population(self, new_population):
         """
@@ -81,14 +103,14 @@ class Crossover():
         return: new_population (numpy.ndarray). The new population after
         the crossover.
         """
-        new_population = []
-        for subject in population:
+        new_population = np.empty(population.shape)
+        for i, subject in enumerate(population):
             r = random.random()
             if r <= self.probability:
                 parent = random.choice(population)
-                new_population.append((subject + parent)/2)
+                new_population[i] = (subject + parent)/2
             else:
-                new_population.append(subject)
+                new_population[i] = subject
         return new_population
 
 class Mutation():
@@ -140,14 +162,13 @@ class Selection():
         
         population: The population from which the individuals will be
         selected.
-        fitness: The fitness of the individuals from the populatio,
+        fitness: The fitness of the individuals from the population,
         matched by the index of the list.
         
-        return selected_pop (numpy.ndarray). The population selected by
-        the roulette.
+        return idx_selected (numpy.ndarray). The index for the individuals
+        selected by the roulette.
         """
         probabilities = fitness/sum(fitness)
-        idx = np.random.choice(len(probabilities), self.n_selected,
+        idx_selected = np.random.choice(len(probabilities), self.n_selected,
                                p=probabilities)
-        selected_pop = population[idx]
-        return selected_pop
+        return idx_selected
