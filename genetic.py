@@ -123,6 +123,18 @@ class Mutation():
                 if r <= self.probability:
                     subject[i] = value + random.uniform(-0.1, 0.1)
         return new_population
+
+class Selection():
+    def __init__(self, n_selections):
+        self.n_selections = n_selections
+        
+    def roulette(self, population, fitness):
+        probabilities = fitness/sum(fitness)
+        idx = np.random.choice(len(probabilities), self.n_selections,
+                               p=probabilities)
+        selected_pop = population[idx]
+        return selected_pop
+            
                 
 #TODO Selection also update the fitness
     #def selection():
