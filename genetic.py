@@ -1,8 +1,6 @@
 import numpy as np
 import random
 
-from chrome_trex import DinoGame
-
 class Genetic():
     def __init__(self, n_population, n_attributes):
         """
@@ -62,32 +60,32 @@ class Genetic():
 class Crossover():
     def __init__(self, probability):
         """
-        Initializes a Crossover object, wich is responsible for applying
+        Initializes a Crossover object, which is responsible for applying
         the distinct types of crossover functions.
         
         probability: The probability of ocorruing a crossover.
         
-        return: Crossover object
+        return: Crossover object.
         """
         self.probability = probability
         
-    def mean(self, selected_pop):
+    def mean(self, population):
         """
         Apply crossover by the mean, where the children is the mean
         between the two parents. For each subject, another parents is
         chosen randomly.
         
-        selected_pop: The selected population from wich the children
-        will be generated.
+        population: The population from which the children will be
+        generated.
         
         return: new_population (numpy.ndarray). The new population after
         the crossover.
         """
         new_population = []
-        for subject in selected_pop:
+        for subject in population:
             r = random.random()
             if r <= self.probability:
-                parent = random.choice(selected_pop)
+                parent = random.choice(population)
                 new_population.append((subject + parent)/2)
             else:
                 new_population.append(subject)
@@ -96,27 +94,27 @@ class Crossover():
 class Mutation():
     def __init__(self, probability):
         """
-        Initializes a Mutation object, wich is responsible for applying
+        Initializes a Mutation object, which is responsible for applying
         the distinct types of mutation functions.
         
         probability: The probability of ocorruing a mutation.
         
-        return: Mutation object
+        return: Mutation object.
         """
         self.probability = probability
     
-    def sum_value(self, selected_pop):
+    def sum_value(self, population):
         """
         Mutate the attribute of a subject by summing a value between
         [-0.1, 0.1] to it. The mutation has a chance to occur in each
         attribute from each subject.
         
-        selected_pop: The selected population that will be mutated.
+        population: The population that will suffer mutation.
         
         return: new_population (numpy.ndarray). The new population after
         the mutations.
         """
-        new_population = selected_pop.copy()
+        new_population = population.copy()
         for subject in new_population:
             for i, value in enumerate(subject):
                 r = random.random()
@@ -125,16 +123,31 @@ class Mutation():
         return new_population
 
 class Selection():
-    def __init__(self, n_selections):
-        self.n_selections = n_selections
+    def __init__(self, n_selected):
+        """
+        Initializes a Selection object, which is responsible for applying
+        the distinct types of selection functions.
+        
+        n_selected: The number of individuals that will be selected.
+        
+        return: Selection object.
+        """
+        self.n_selected = n_selected
         
     def roulette(self, population, fitness):
+        """
+        Apply a roulette wheel selection to the given population.
+        
+        population: The population from which the individuals will be
+        selected.
+        fitness: The fitness of the individuals from the populatio,
+        matched by the index of the list.
+        
+        return selected_pop (numpy.ndarray). The population selected by
+        the roulette.
+        """
         probabilities = fitness/sum(fitness)
-        idx = np.random.choice(len(probabilities), self.n_selections,
+        idx = np.random.choice(len(probabilities), self.n_selected,
                                p=probabilities)
         selected_pop = population[idx]
         return selected_pop
-            
-                
-#TODO Selection also update the fitness
-    #def selection():
