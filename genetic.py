@@ -4,15 +4,33 @@ import random
 from chrome_trex import DinoGame
 
 class Genetic():
-    def __init__(self, n_population):
-        self.population = []
-        for _ in range(n_population):
-            self.population.append(np.random.uniform(size=(3, 10)))
-    
-    def calc_fitness(self, game):
+    def __init__(self, n_population, n_attributes):
+        """
+        Initializes a genetic algorithm object by creating the first
+        population.
+        
+        n_population: Size of the starting population. Number of rows
+        in the population matrix.
+        n_attributes: Number of attributes each individual possess.
+        Number of columns on the population matrix.
+        
+        return: Genetic object
+        """
+        self.population = np.random.uniform(size=(n_population, n_attributes))
+        
+    def calc_fitness(self, func, *args, **kwargs):
+        """
+        Calculates the fitness for each subject in the population.
+        
+        func: The function that will be used to calculate the fitness.
+        args: Arbitrary argument lists.
+        kwargs: Keyword arguments.
+        
+        return: None
+        """
         self.fitness = []
         for subject in self.population:
-            self.fitness.append(Genetic.__play_game(subject, game))
+            self.fitness.append(func(subject, *args, **kwargs))
         
     def get_fitness(self):
         return self.fitness
@@ -32,7 +50,11 @@ class Genetic():
                 game.step(action)
             scores.append(game.get_score())
         return np.mean(scores)
+    
+#    def __build_state_matrix(state):
+#        state_matrix = np.zeros(())
         
+    
 class Crossover():
     def __init__(self, probability):
         self.probability = probability
