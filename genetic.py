@@ -46,7 +46,6 @@ class Genetic():
         """
         return self.population
     
-    
     def set_fitness(self, new_fitness):
         """
         Override the fitness array with a new one.
@@ -130,7 +129,6 @@ class Crossover():
             else:
                 new_population[i] = subject
         return new_population
-
 
 class Mutation():
     def __init__(self, probability):
@@ -222,4 +220,3 @@ class Selection():
         """
         idx_selected = np.argsort(fitness)[-n:]
         return idx_selected
-    

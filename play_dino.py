@@ -3,10 +3,10 @@ import numpy as np
 from chrome_trex import DinoGame
 from genetic import Genetic, Crossover, Mutation, Selection
 
-POP_SIZE = 25
+POP_SIZE = 50
 P_CROSSOVER = 0.8
 P_MUTATION = 0.1
-N_GENERATIONS = 50
+N_GENERATIONS = 100
 
 def calc_fitness(subject, game):
     scores = []
@@ -30,15 +30,14 @@ def create_state_matrix(game):
         b = b+b
     return state_matrix
     
-def play_game(game, best_individual):
-    game.reset()
+def play_game(best_individual):
+    game = DinoGame(fps=60)
     while not game.game_over:
         state_matrix = create_state_matrix(game)
         action = np.argmax(best_individual @ state_matrix.T)
         game.step(action)
     return game.get_score()
-    
-    
+       
 game = DinoGame(fps=1000000)
 ga = Genetic(POP_SIZE, 30)
 cr = Crossover(P_CROSSOVER)
@@ -47,20 +46,28 @@ se = Selection(POP_SIZE)
 best_fitness = 0
 for _ in range(N_GENERATIONS):
     #Reproduction
-    new_population = cr.mean(ga.get_population())
-    new_population = mu.sum_value(new_population)
-    total_population = np.concatenate((ga.get_population(), new_population))
+    #   mean and sum_value
+    new_pop0 = cr.mean(ga.get_population())
+    new_pop0 = mu.sum_value(new_pop0)
+    #   uniform and random resetting
+    new_pop1 = cr.uniform(ga.get_population())
+    new_pop1 = mu.random_resetting(new_pop1,0,1)
+    total_population = np.concatenate((ga.get_population(), new_pop0,
+                                       new_pop1))
     ga.set_population(total_population)
     #Evaluation
     ga.calc_fitness(calc_fitness, game)
     fitness = ga.get_fitness()
-    #Save best
-    idx_best = ga.best_individual()
-    if fitness[idx_best] > best_fitness:
-        best_individual = total_population[idx_best]
-        best_fitness = fitness[idx_best]
     #Selection
-    idx_selected = se.roulette(total_population, fitness)
+    #   Roulette
+    idx_roulette = se.roulette(fitness)
+    #   N-best
+    idx_n_best = se.n_best(fitness, 5)
+    idx_selected = np.concatenate((idx_roulette, idx_n_best))
     ga.set_population(total_population[idx_selected])
     ga.set_fitness(fitness[idx_selected])
+    #Save best
+    if fitness[idx_n_best[-1]] > best_fitness:
+        best_individual = total_population[idx_n_best[-1]]
+        best_fitness = fitness[idx_n_best[-1]]
     print(np.mean(fitness), best_fitness)
