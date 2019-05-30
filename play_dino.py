@@ -12,6 +12,15 @@ N_GAMES_PLAYED = 10
 
 #TODO Try other values as fitness: min, mean+std
 def calc_fitness(subject, game):
+    """
+    Function used to calculate the fitness on the genetic algorithm.
+    
+    subject: The individual for which you want to determine the fitness.
+    game: A initialized DinoGame object.
+    
+    return: mean scores (int). The mean of the scores of all N games
+    played.
+    """
     scores = []
     state_matrix = np.zeros((3, 30))
     for _ in range(N_GAMES_PLAYED):
@@ -23,7 +32,15 @@ def calc_fitness(subject, game):
         scores.append(game.get_score())
     return np.mean(scores)
 
-def play_game(best_individual):
+def play_best_game(best_individual):
+    """
+    Play the game with the best individual obtained from the genetic
+    algorithm.
+    
+    best_individual: Best individual after the GA has finished.
+    
+    return game score (int)
+    """
     game = DinoGame(fps=60)
     state_matrix = np.zeros((3, 30))
     while not game.game_over:
@@ -33,6 +50,16 @@ def play_game(best_individual):
     return game.get_score()
 
 def update_state_matrix(game, state_matrix):
+    """
+    Updated the state matrix used to obtain the action when playing the
+    game by multiplying best_individual @ state_matrix.T. The state
+    matrix is necessary so the dimensions match between operands.
+    
+    game: The DinoGame object from which the state is wanted.
+    state_matrix: The previous state matrix that will be updated.
+    
+    return: updated state_matrix (numpy.ndarray)
+    """
     state = game.get_state()
     state_matrix[0, 0:10] = state
     state_matrix[1, 10:20] = state
