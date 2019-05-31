@@ -102,6 +102,30 @@ class Crossover():
                 new_population[i] = subject
         return new_population
     
+    def one_point(self, population):
+        """
+        Apply one point crossover, where a random crossover point is
+        selected and the child is created by merging the head of parent
+        one before that point, with the tail of parent two from that
+        point.
+        
+        population: The population from which the children will be
+        generated.
+        
+        return: new_population (numpy.ndarray). The new population after
+        the crossover.
+        """
+        new_population = np.empty(population.shape)
+        size = len(population[0])
+        for i, subject in enumerate(population):
+            r = random.random()
+            if r <= self.probability:
+                point = random.randrange(size)
+                parent = random.choice(population)
+                new_population[i][:point] = subject[:point]
+                new_population[i][point:] = parent[point:]
+        return new_population
+        
     def uniform(self, population):
         """
         Apply a uniform crossover to the population. The children are
@@ -142,6 +166,29 @@ class Mutation():
         """
         self.probability = probability
     
+    #TODO Make a single func that can sum and multiply
+    #TODO make a and b parameter
+    def multiply_value(self, population):
+        """
+        Mutate the attribute of a subject by multiplying a value between
+        [0.9, 1.1] to it. The mutation has a chance to occur in each
+        attribute from each subject.
+        
+        population: The population that will suffer mutation.
+        
+        return: new_population (numpy.ndarray). The new population after
+        the mutations.
+        """
+        new_population = population.copy()
+        for subject in new_population:
+            for i, value in enumerate(subject):
+                r = random.random()
+                if r <= self.probability:
+                    subject[i] = value * random.uniform(0.9, 1.1)
+        return new_population
+        
+    #TODO if attribute < 0.1 it could got to negative. Problem?
+    #TODO make a and b parameter
     def sum_value(self, population):
         """
         Mutate the attribute of a subject by summing a value between
