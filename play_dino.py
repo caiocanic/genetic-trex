@@ -7,7 +7,7 @@ POP_SIZE = 50
 P_CROSSOVER = 0.8
 P_MUTATION = 0.1
 N_GENERATIONS = 100
-N_BEST = 5
+N_BEST = 10
 N_GAMES_PLAYED = 10
 
 #TODO Try other values as fitness: min, mean+std
@@ -80,8 +80,13 @@ for _ in range(N_GENERATIONS):
     #   uniform and random resetting
     new_pop1 = cr.uniform(ga.get_population())
     new_pop1 = mu.random_resetting(new_pop1,0,1)
+    #   one_point and multiply_value
+    new_pop2 = cr.one_point(ga.get_population())
+    new_pop2 = mu.multiply_value(new_pop1)
+    #   random pop #TODO Make it a function
+    new_pop3 = np.random.uniform(size=(POP_SIZE//2, 30))
     total_population = np.concatenate((ga.get_population(), new_pop0,
-                                       new_pop1))
+                                       new_pop1, new_pop2, new_pop3))
     ga.set_population(total_population)
     #Evaluation
     ga.calc_fitness(calc_fitness, game)
