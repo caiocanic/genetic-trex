@@ -1,13 +1,13 @@
 import numpy as np
 
 from chrome_trex import DinoGame
-from genetic import Genetic, Crossover, Mutation, Selection
+import genetic as ga
 
 POP_SIZE = 50
 P_CROSSOVER = 0.8
 P_MUTATION = 0.1
 N_GENERATIONS = 100
-N_BEST = 10
+N_BEST = 10 #TODO implement N_BEST use set
 N_GAMES_PLAYED = 10
 
 #TODO Try other values as fitness: min, mean+std
@@ -65,42 +65,45 @@ def update_state_matrix(game, state_matrix):
     state_matrix[1, 10:20] = state
     state_matrix[2, 20:30] = state
     return state_matrix
-       
-game = DinoGame(fps=1000000)
-ga = Genetic(POP_SIZE, 30)
-cr = Crossover(P_CROSSOVER)
-mu = Mutation(P_MUTATION)
-se = Selection(POP_SIZE)
-best_fitness = 0
-for _ in range(N_GENERATIONS):
+
+
+game = DinoGame(fps=1_000_000)
+#Population Initialization
+population = ga.initialize_population(POP_SIZE, 30)
+#First Evaluation
+fitness = ga.calc_fitness(calc_fitness, population, game)
+#Save first best #TODO change way the best is selected
+idx_best = ga.selection.n_best(fitness, 1)
+best_individual = population[idx_best]
+best_fitness = fitness[idx_best]
+print(0, np.mean(fitness), best_fitness)
+for gen in range(N_GENERATIONS):
     #Reproduction
-    #   mean and sum_value
-    new_pop0 = cr.mean(ga.get_population())
-    new_pop0 = mu.sum_value(new_pop0)
-    #   uniform and random resetting
-    new_pop1 = cr.uniform(ga.get_population())
-    new_pop1 = mu.random_resetting(new_pop1,0,1)
+    #   recombination and sum_value
+    idx_parents = ga.selection.parents(fitness, POP_SIZE)
+    new_pop0 = ga.crossover.recombination(population, P_CROSSOVER, idx_parents)
+    new_pop0 = ga.mutation.sum_value(new_pop0, P_MUTATION)
     #   one_point and multiply_value
-    new_pop2 = cr.one_point(ga.get_population())
-    new_pop2 = mu.multiply_value(new_pop1)
-    #   random pop #TODO Make it a function
-    new_pop3 = np.random.uniform(size=(POP_SIZE//2, 30))
-    total_population = np.concatenate((ga.get_population(), new_pop0,
-                                       new_pop1, new_pop2, new_pop3))
-    ga.set_population(total_population)
-    #Evaluation
-    ga.calc_fitness(calc_fitness, game)
-    fitness = ga.get_fitness()
-    #Selection
-    #   Roulette
-    idx_roulette = se.roulette(fitness)
-    #   N-best
-    idx_n_best = se.n_best(fitness, N_BEST)
-    idx_selected = np.concatenate((idx_roulette, idx_n_best))
-    ga.set_population(total_population[idx_selected])
-    ga.set_fitness(fitness[idx_selected])
+    idx_parents = ga.selection.parents(fitness, POP_SIZE)
+    new_pop1 = ga.crossover.one_point(population, P_CROSSOVER, idx_parents)
+    new_pop1 = ga.mutation.multiply_value(new_pop1, P_MUTATION)
+    #   uniform and random resetting
+    idx_parents = ga.selection.parents(fitness, POP_SIZE)
+    new_pop2 = ga.crossover.uniform(population, P_CROSSOVER, idx_parents)
+    new_pop2 = ga.mutation.random_resetting(new_pop2, P_MUTATION)
+    #   random pop
+    new_pop3 = ga.initialize_population(POP_SIZE//2, 30)
+    new_population = np.concatenate((new_pop0, new_pop1, new_pop2, new_pop3))
+    #Survivor Selection
+    new_fitness = ga.calc_fitness(calc_fitness, new_population, game)
+    total_population = np.concatenate((population, new_population))
+    total_fitness = np.concatenate((fitness, new_fitness))
+    idx_selected = ga.selection.roulette(total_fitness, POP_SIZE)
+    population = total_population[idx_selected]
+    fitness = total_fitness[idx_selected]
     #Save best
-    if fitness[idx_n_best[-1]] > best_fitness:
-        best_individual = total_population[idx_n_best[-1]]
-        best_fitness = fitness[idx_n_best[-1]]
-    print(np.mean(fitness), best_fitness)
+    idx_best = ga.selection.n_best(total_fitness, 1)
+    if total_fitness[idx_best] > best_fitness:
+        best_individual = total_population[idx_best]
+        best_fitness = total_fitness[idx_best]
+    print(gen+1, np.mean(fitness), best_fitness)
