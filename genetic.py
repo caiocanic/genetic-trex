@@ -127,16 +127,20 @@ class crossover():
         return new_population
 
 class mutation():
-    def multiply_value(population, probability, a=0.9, b=1.1):
+    def multiply_value(population, probability, a=0.9, b=1.1, low=0.0,
+                       high=1.0):
         """
         Mutate the attribute of a subject by multiplying a random value
-        between [a, b] to it. The mutation has a chance to occur in each
-        attribute from each subject.
+        between [a, b] to it. The value cannot go higher or lower than
+        its boundaries [low, high]. The mutation has a chance to occur
+        in each attribute from each subject.
         
         population: The population that will suffer mutation.
         probability: The probability of ocorruing a mutation.
         a = The start point of the random range.
         b = The end point of the random range.
+        low: The lower boundary for the attributes.
+        high: The upper boundary for the attributes.
         
         return: new_population (numpy.ndarray). The new population after
         the mutations.
@@ -147,6 +151,10 @@ class mutation():
                 r = random.random()
                 if r <= probability:
                     subject[i] = value * random.uniform(a, b)
+                    if subject[i] < low:
+                        subject[i] = low
+                    elif subject[i] > high:
+                        subject[i] = high
         return new_population
 
     def random_resetting(population, probability, low=0.0, high=1.0):
