@@ -214,7 +214,7 @@ class selection():
         Apply a roulette wheel selection to the given population.
         
         fitness: The fitness of the individuals from the population,
-        matched by the index of the list.
+        matched by the index of the array.
         n_selected: The number of individuals that will be selected.
         replace: Whether the selection is with or without replacement,
         default is False.
@@ -233,7 +233,7 @@ class selection():
         their fitness.
         
         fitness: The fitness of the individuals from the population,
-        matched by the index of the list.
+        matched by the index of the array.
         n_selected: The number of individuals that will be selected.
         
         return idx_selected (numpy.ndarray). The index for the n best

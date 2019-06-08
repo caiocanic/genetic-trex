@@ -6,11 +6,11 @@ from chrome_trex import DinoGame
 import genetic as ga
 
 #TODO Try adaptative probabilities
-POP_SIZE = 50
+POP_SIZE = 10
 N_ATTRIBUTES = 30
 P_CROSSOVER = 0.8
-P_MUTATION = 1/N_ATTRIBUTES*2#0.1
-N_GENERATIONS = 100
+P_MUTATION = 1/N_ATTRIBUTES
+N_GENERATIONS = 2#100
 N_BEST = 10 #TODO implement N_BEST use set
 N_GAMES_PLAYED = 10
 
@@ -91,26 +91,43 @@ def save_parameters():
         file.write(f"N_GAMES_PLAYED = {N_GAMES_PLAYED}")
     return save_dir
 
+def save_best(population, fitness, old_best_fitness, path_best_idv):
+    """
+    Find the best fitness on the given population. If this population
+    best fitness is greater than the one from the past generations,
+    update the best individual according and save it to a npy file.
+    
+    population: The current population, were the best_fitness will be
+    searched.
+    fitness: The fitness of the individuals on the population, matched
+    by the index of the array.
+    old_best_fitness: The best fitness from the past generations.
+    path_best_idv: Path were to save the best individual.
+    
+    return: max(best_fitness, old_best_fitness) (float64) Return the
+    greater value between the old and new best_fitness.
+    """
+    idx_best = np.argmax(fitness)
+    if fitness[idx_best] > old_best_fitness:
+        best_fitness = fitness[idx_best]
+        best_individual = population[idx_best]
+        np.save(path_best_idv, best_individual)
+        return best_fitness
+    else:
+        return old_best_fitness
+
 #Paths
 save_dir = save_parameters()    
 path_pop = os.path.join(save_dir, "population.npy")
 path_fitness = os.path.join(save_dir, "fitness.npy")
 path_best_idv = os.path.join(save_dir, "best_individual.npy")
 
-#TODO use functions to simplify code bellow
 game = DinoGame(fps=1_000_000)
-#Population Initialization
 population = ga.initialize_population(POP_SIZE, N_ATTRIBUTES)
-#First Evaluation
 fitness = ga.calc_fitness(calc_fitness, population, game)
-#Save population and fitness
 np.save(path_pop, population)
 np.save(path_fitness, fitness)
-#Save first best #TODO change way the best is selected
-idx_best = ga.selection.n_best(fitness, 1)
-best_individual = population[idx_best]
-best_fitness = fitness[idx_best]
-np.save(path_best_idv, best_individual)
+best_fitness = save_best(population, fitness, 0, path_best_idv)
 print(0, np.mean(fitness), best_fitness)
 for gen in range(N_GENERATIONS):
     #Reproduction
@@ -140,9 +157,5 @@ for gen in range(N_GENERATIONS):
     np.save(path_pop, population)
     np.save(path_fitness, fitness)
     #Save best individual
-    idx_best = ga.selection.n_best(total_fitness, 1)
-    if total_fitness[idx_best] > best_fitness:
-        best_individual = total_population[idx_best]
-        best_fitness = total_fitness[idx_best]
-        np.save(path_best_idv, best_individual)
+    best_fitness = save_best(population, fitness, best_fitness, path_best_idv)
     print(gen+1, np.mean(fitness), best_fitness)
