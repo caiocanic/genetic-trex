@@ -6,11 +6,11 @@ from chrome_trex import DinoGame
 import genetic as ga
 
 #TODO Try adaptative probabilities
-POP_SIZE = 10
+POP_SIZE = 100
 N_ATTRIBUTES = 30
 P_CROSSOVER = 0.8
 P_MUTATION = 1/N_ATTRIBUTES
-N_GENERATIONS = 2#100
+N_GENERATIONS = 100
 N_BEST = 10 #TODO implement N_BEST use set
 N_GAMES_PLAYED = 10
 
@@ -116,19 +116,42 @@ def save_best(population, fitness, old_best_fitness, path_best_idv):
     else:
         return old_best_fitness
 
+def save_log(gen, mean_fitness, best_fitness, save_dir):
+    """
+    Write the current generation number, the mean fitness and the best
+    fitness to a log.txt file. Also print those informations.
+    
+    gen: Current generation number.
+    mean_fitness: The mean of all fitness from the current generation.
+    best_fitness: The best fitness from ALL generations.
+    save_dir: Path to the directory where to save the log file.
+    
+    return: None
+    """
+    log_path = os.path.join(save_dir, "log.txt")
+    with open(log_path, "a") as log_file:
+        if gen == 0:
+            log_file.write(f"GEN\tMEAN\tBEST\n")
+        if gen != N_GENERATIONS:
+            log_file.write(f"{gen}\t{mean_fitness}\t{best_fitness}\n")
+        else:
+            log_file.write(f"{gen}\t{mean_fitness}\t{best_fitness}")
+    print(f"GEN: {gen} \t MEAN: {mean_fitness} \t BEST: {best_fitness}")
+
 #Paths
 save_dir = save_parameters()    
 path_pop = os.path.join(save_dir, "population.npy")
 path_fitness = os.path.join(save_dir, "fitness.npy")
 path_best_idv = os.path.join(save_dir, "best_individual.npy")
 
+#TODO Make so it can train again a population.
 game = DinoGame(fps=1_000_000)
 population = ga.initialize_population(POP_SIZE, N_ATTRIBUTES)
 fitness = ga.calc_fitness(calc_fitness, population, game)
 np.save(path_pop, population)
 np.save(path_fitness, fitness)
 best_fitness = save_best(population, fitness, 0, path_best_idv)
-print(0, np.mean(fitness), best_fitness)
+save_log(0, np.mean(fitness), best_fitness, save_dir)
 for gen in range(N_GENERATIONS):
     #Reproduction
     #   recombination and sum_value
@@ -158,4 +181,4 @@ for gen in range(N_GENERATIONS):
     np.save(path_fitness, fitness)
     #Save best individual
     best_fitness = save_best(population, fitness, best_fitness, path_best_idv)
-    print(gen+1, np.mean(fitness), best_fitness)
+    save_log(gen+1, np.mean(fitness), best_fitness, save_dir)
